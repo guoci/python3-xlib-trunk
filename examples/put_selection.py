@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # examples/put_selection.py -- demonstrate putting selections
 # (equivalent to copying to the clipboard)
@@ -131,7 +131,7 @@ def main():
             # Is the client asking for which types we support?
             if e.target == targets_atom:
                 # Then respond with TARGETS and the type
-                prop_value = [targets_atom] + types.keys()
+                prop_value = [targets_atom] + list(types.keys())
                 prop_type = Xatom.ATOM
                 prop_format = 32
 
@@ -175,4 +175,5 @@ def main():
 
 
 if __name__ == '__main__':
+    # import pdb;pdb.set_trace()
     main()

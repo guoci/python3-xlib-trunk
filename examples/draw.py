@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # examples/draw.py -- high-level xlib test application.
 #

@@ -33,24 +33,24 @@ def main(argv):
 
     if not display.has_extension('XFIXES'):
         if display.query_extension('XFIXES') is None:
-            print >>sys.stderr, 'XFIXES extension not supported'
+            print('XFIXES extension not supported', file=sys.stderr)
             return 1
 
     xfixes_version = display.xfixes_query_version()
-    print >>sys.stderr, 'Found XFIXES version %s.%s' % (
+    print('Found XFIXES version %s.%s' % (
       xfixes_version.major_version,
       xfixes_version.minor_version,
-    )
+    ), file=sys.stderr)
 
     screen = display.screen()
 
-    print >>sys.stderr, 'Hiding cursor ...'
+    print('Hiding cursor ...', file=sys.stderr)
     screen.root.xfixes_hide_cursor()
     display.sync()
 
     time.sleep(5)
 
-    print >>sys.stderr, 'Showing cursor ...'
+    print('Showing cursor ...', file=sys.stderr)
     screen.root.xfixes_hide_cursor()
     display.sync()
 

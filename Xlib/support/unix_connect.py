@@ -16,27 +16,14 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import re
-import string
+import fcntl
 import os
 import platform
+import re
 import socket
 
-# FCNTL is deprecated from Python 2.2, so only import it if we doesn't
-# get the names we need.  Furthermore, FD_CLOEXEC seems to be missing
-# in Python 2.2.
-
-import fcntl
-
-if hasattr(fcntl, 'F_SETFD'):
-    F_SETFD = fcntl.F_SETFD
-    if hasattr(fcntl, 'FD_CLOEXEC'):
-        FD_CLOEXEC = fcntl.FD_CLOEXEC
-    else:
-        FD_CLOEXEC = 1
-else:
-    from FCNTL import F_SETFD, FD_CLOEXEC
-
+F_SETFD = fcntl.F_SETFD
+FD_CLOEXEC = fcntl.FD_CLOEXEC
 
 from Xlib import error, xauth
 
@@ -86,7 +73,7 @@ def get_socket(dname, host, dno):
         else:
             s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             s.connect('/tmp/.X11-unix/X%d' % dno)
-    except socket.error, val:
+    except OSError as val:
         raise error.DisplayConnectionError(dname, str(val))
 
     # Make sure that the connection isn't inherited in child processes
@@ -106,8 +93,8 @@ def new_get_auth(sock, dname, host, dno):
 
         # Convert the prettyprinted IP number into 4-octet string.
         # Sometimes these modules are too damn smart...
-        octets = string.split(sock.getpeername()[0], '.')
-        addr = string.join(map(lambda x: chr(int(x)), octets), '')
+        octets = sock.getpeername()[0].split('.')
+        addr = ''.join(chr(int(x)) for x in octets)
     else:
         family = xauth.FamilyLocal
         addr = socket.gethostname()
@@ -143,9 +130,9 @@ def old_get_auth(sock, dname, host, dno):
         #      DISPLAY SCHEME COOKIE
         # We're interested in the two last parts for the
         # connection establishment
-        lines = string.split(data, '\n')
+        lines = data.split('\n')
         if len(lines) >= 1:
-            parts = string.split(lines[0], None, 2)
+            parts = lines[0].split(None, 2)
             if len(parts) == 3:
                 auth_name = parts[1]
                 hexauth = parts[2]
@@ -153,7 +140,7 @@ def old_get_auth(sock, dname, host, dno):
 
                 # Translate hexcode into binary
                 for i in range(0, len(hexauth), 2):
-                    auth = auth + chr(string.atoi(hexauth[i:i+2], 16))
+                    auth = auth + chr(int(hexauth[i:i+2], 16))
 
                 auth_data = auth
     except os.error:

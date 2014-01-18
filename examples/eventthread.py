@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # examples/eventthread.py -- Tests multithreaded event handling
 #
@@ -38,7 +38,7 @@ class EventThread(Thread):
     def run(self):
         while True:
             event = self.display.next_event()
-            print 'event: %r' % event
+            print('event: %r' % event)
 
 
 def main(argv):
@@ -54,7 +54,7 @@ def main(argv):
     # call in the thread.
     atom = display.intern_atom('_XROOTPMAP_ID', True)
     response = screen.root.get_property(atom, Xatom.PIXMAP, 0, 1)
-    print 'get_property response: %r' % response
+    print('get_property response: %r' % response)
 
     display.close()
 

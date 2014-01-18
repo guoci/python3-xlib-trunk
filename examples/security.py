@@ -52,14 +52,14 @@ def main(argv):
 
     if not display.has_extension('SECURITY'):
         if display.query_extension('SECURITY') is None:
-            print >>sys.stderr, 'SECURITY extension not supported'
+            print('SECURITY extension not supported', file=sys.stderr)
             return 1
 
     security_version = display.security_query_version()
-    print >>sys.stderr, 'Found SECURITY version %s.%s' % (
+    print('Found SECURITY version %s.%s' % (
       security_version.major_version,
       security_version.minor_version,
-    )
+    ), file=sys.stderr)
 
     if opts.generate:
         kwargs = {}
@@ -68,7 +68,7 @@ def main(argv):
         elif opts.untrusted:
             kwargs['trust_level'] = security.SecurityClientUntrusted
         reply = display.security_generate_authorization(opts.proto, **kwargs)
-        print reply.authid
+        print(reply.authid)
 
     elif opts.revoke:
         for arg in args:

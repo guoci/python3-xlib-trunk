@@ -17,34 +17,34 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 # Python modules
-import new
+import types
 
 # Xlib modules
-import error
-import ext
-import X
+from . import error
+from . import ext
+from . import X
 
 # Xlib.protocol modules
-import protocol.display
-from protocol import request, event, rq
+import Xlib.protocol.display
+from Xlib.protocol import request, event, rq
 
 # Xlib.xobjects modules
-import xobject.resource
-import xobject.drawable
-import xobject.fontable
-import xobject.colormap
-import xobject.cursor
+import Xlib.xobject.resource
+import Xlib.xobject.drawable
+import Xlib.xobject.fontable
+import Xlib.xobject.colormap
+import Xlib.xobject.cursor
 
 _resource_baseclasses = {
-    'resource': xobject.resource.Resource,
-    'drawable': xobject.drawable.Drawable,
-    'window': xobject.drawable.Window,
-    'pixmap': xobject.drawable.Pixmap,
-    'fontable': xobject.fontable.Fontable,
-    'font': xobject.fontable.Font,
-    'gc': xobject.fontable.GC,
-    'colormap': xobject.colormap.Colormap,
-    'cursor': xobject.cursor.Cursor,
+    'resource': Xlib.xobject.resource.Resource,
+    'drawable': Xlib.xobject.drawable.Drawable,
+    'window': Xlib.xobject.drawable.Window,
+    'pixmap': Xlib.xobject.drawable.Pixmap,
+    'fontable': Xlib.xobject.fontable.Fontable,
+    'font': Xlib.xobject.fontable.Font,
+    'gc': Xlib.xobject.fontable.GC,
+    'colormap': Xlib.xobject.colormap.Colormap,
+    'cursor': Xlib.xobject.cursor.Cursor,
     }
 
 _resource_hierarchy = {
@@ -55,18 +55,18 @@ _resource_hierarchy = {
     'fontable': ('font', 'gc')
     }
 
-class _BaseDisplay(protocol.display.Display):
+class _BaseDisplay(Xlib.protocol.display.Display):
     resource_classes = _resource_baseclasses.copy()
 
     # Implement a cache of atom names, used by Window objects when
     # dealing with some ICCCM properties not defined in Xlib.Xatom
 
     def __init__(self, *args, **keys):
-        apply(protocol.display.Display.__init__, (self, ) + args, keys)
+        Xlib.protocol.display.Display.__init__(*(self, ) + args, **keys)
         self._atom_cache = {}
 
     def get_atom(self, atomname, only_if_exists=0):
-        if self._atom_cache.has_key(atomname):
+        if atomname in self._atom_cache:
             return self._atom_cache[atomname]
 
         r = request.InternAtom(display = self, name = atomname, only_if_exists = only_if_exists)
@@ -111,7 +111,8 @@ class Display:
             if extname in exts:
 
                 # Import the module and fetch it
-                __import__('Xlib.ext.' + modname)
+                __import__('ext.' + modname,globals(),level=1)
+                # __import__('Xlib.ext.' + modname)
                 mod = getattr(ext, modname)
 
                 info = self.query_extension(extname)
@@ -124,9 +125,9 @@ class Display:
 
 
         # Finalize extensions by creating new classes
-        for type, dict in self.class_extension_dicts.items():
-            origcls = self.display.resource_classes[type]
-            self.display.resource_classes[type] = new.classobj(origcls.__name__,
+        for type_, dict in self.class_extension_dicts.items():
+            origcls = self.display.resource_classes[type_]
+            self.display.resource_classes[type_] = type(origcls.__name__,
                                                                (origcls,),
                                                                dict)
 
@@ -216,7 +217,7 @@ class Display:
     def __getattr__(self, attr):
         try:
             function = self.display_extension_methods[attr]
-            return new.instancemethod(function, self, self.__class__)
+            return types.MethodType(function, self)
         except KeyError:
             raise AttributeError(attr)
 
@@ -243,10 +244,10 @@ class Display:
     ### Extension module interface
     ###
 
-    def extension_add_method(self, object, name, function):
-        """extension_add_method(object, name, function)
+    def extension_add_method(self, object_, name, function):
+        """extension_add_method(object_, name, function)
 
-        Add an X extension module method.  OBJECT is the type of
+        Add an X extension module method.  OBJECT_ is the type of
         object to add the function to, a string from this list:
 
             display
@@ -264,26 +265,26 @@ class Display:
         normal function whose first argument is a 'self'.
         """
 
-        if object == 'display':
+        if object_ == 'display':
             if hasattr(self, name):
                 raise AssertionError('attempting to replace display method: %s' % name)
 
             self.display_extension_methods[name] = function
 
         else:
-            types = (object, ) + _resource_hierarchy.get(object, ())
+            types = (object_, ) + _resource_hierarchy.get(object_, ())
             for type in types:
                 cls = _resource_baseclasses[type]
                 if hasattr(cls, name):
                     raise AssertionError('attempting to replace %s method: %s' % (type, name))
 
-                method = new.instancemethod(function, None, cls)
+                # method = new.instancemethod(function, None, cls)
 
                 # Maybe should check extension overrides too
                 try:
-                    self.class_extension_dicts[type][name] = method
+                    self.class_extension_dicts[type][name] = function
                 except KeyError:
-                    self.class_extension_dicts[type] = { name: method }
+                    self.class_extension_dicts[type] = { name: function }
 
     def extension_add_event(self, code, evt, name = None):
         """extension_add_event(code, evt, [name])
@@ -297,8 +298,8 @@ class Display:
         extension_event.
         """
 
-        newevt = new.classobj(evt.__name__, evt.__bases__,
-                              evt.__dict__.copy())
+        newevt = type(evt.__name__, evt.__bases__,
+                      evt.__dict__.copy())
         newevt._code = code
 
         self.display.add_extension_event(code, newevt)
@@ -321,7 +322,7 @@ class Display:
         extension_event.
         """
 
-        newevt = new.classobj(evt.__name__, evt.__bases__,
+        newevt = type(evt.__name__, evt.__bases__,
                               evt.__dict__.copy())
         newevt._code = code
 
@@ -383,7 +384,7 @@ class Display:
         lowest index and secondarily on the lowest keycode."""
         try:
             # Copy the map list, reversing the arguments
-            return map(lambda x: (x[1], x[0]), self._keymap_syms[keysym])
+            return [(x[1], x[0]) for x in self._keymap_syms[keysym]]
         except KeyError:
             return []
 
@@ -425,7 +426,7 @@ class Display:
             index = 0
             for sym in syms:
                 if sym != X.NoSymbol:
-                    if self._keymap_syms.has_key(sym):
+                    if sym in self._keymap_syms:
                         symcodes = self._keymap_syms[sym]
                         symcodes.append((index, code))
                         symcodes.sort()

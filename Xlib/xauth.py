@@ -40,7 +40,7 @@ class Xauthority:
 
         try:
             raw = open(filename, 'rb').read()
-        except IOError, err:
+        except OSError as err:
             raise error.XauthError('~/.Xauthority: %s' % err)
 
         self.entries = []
@@ -81,13 +81,13 @@ class Xauthority:
                 if len(data) != length:
                     break
 
-                self.entries.append((family, addr, num, name, data))
-        except struct.error, e:
-            print "Xlib.xauth: warning, failed to parse part of xauthority file (%s), aborting all further parsing" % filename
+                self.entries.append((family, addr, num, name, data, ))
+        except struct.error as e:
+            print("Xlib.xauth: warning, failed to parse part of xauthority file (%s), aborting all further parsing" % filename)
             #pass
 
         if len(self.entries) == 0:
-            print "Xlib.xauth: warning, no xauthority details available"
+            print("Xlib.xauth: warning, no xauthority details available")
             # raise an error?  this should get partially caught by the XNoAuthError in get_best_auth..
 
     def __len__(self):

@@ -9,7 +9,7 @@ import struct
 # Change path so we find Xlib
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
-def dummy_buffer(str, x, y = sys.maxint):
+def dummy_buffer(str, x, y = sys.maxsize):
     return str[x:y]
 
 __builtins__.buffer = dummy_buffer
@@ -78,7 +78,7 @@ class ParseString:
         return self.data[i]
 
     def __getslice__(self, i, j):
-        if j == sys.maxint:
+        if j == sys.maxsize:
             if self.get_data:
                 ps = ParseString(self.get_data)
                 self.get_data = None
@@ -155,7 +155,7 @@ class ParseXbug:
             if len(d) != 32:
                 # Print out remaining requests
                 try:
-                    self.get_requests(sys.maxint)
+                    self.get_requests(sys.maxsize)
                 except ValueError:
                     pass
                 return

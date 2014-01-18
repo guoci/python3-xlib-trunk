@@ -25,7 +25,6 @@ import sys, array
 
 from Xlib.protocol import rq
 
-
 extname = 'XInputExtension'
 
 PropertyDeleted = 0
@@ -204,7 +203,7 @@ def select_events(self, event_masks):
     for deviceid, mask in event_masks:
         mask_seq = array.array(rq.struct_to_array_codes['L'])
 
-        if isinstance(mask, (int, long)):
+        if isinstance(mask, int):
             # We need to build a "binary mask" that (as far as I can tell) is
             # encoded in native byte order from end to end.  The simple case is
             # with a single unsigned 32-bit value, for which we construct an

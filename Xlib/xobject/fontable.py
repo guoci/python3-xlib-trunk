@@ -18,8 +18,8 @@
 
 from Xlib.protocol import request
 
-import resource
-import cursor
+from . import resource
+from . import cursor
 
 class Fontable(resource.Resource):
     __fontable__ = resource.Resource.__resource__
@@ -84,10 +84,10 @@ class Font(Fontable):
                           font = self.id)
         self.display.free_resource_id(self.id)
 
-    def create_glyph_cursor(self, mask, source_char, mask_char,
-                            (fore_red, fore_green, fore_blue),
-                            (back_red, back_green, back_blue)):
+    def create_glyph_cursor(self, mask, source_char, mask_char, fore_rgb, back_rgb):
 
+        (fore_red, fore_green, fore_blue) = fore_rgb
+        (back_red, back_green, back_blue) = back_rgb
         cid = self.display.allocate_resource_id()
         request.CreateGlyphCursor(display = self.display,
                                   cid = cid,

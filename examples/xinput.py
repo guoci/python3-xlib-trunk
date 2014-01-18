@@ -20,30 +20,30 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import sys
-
+import os;sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from Xlib.display import Display
 from Xlib.ext import xinput
 
 
 def print_hierarchy_changed_event(event):
-    print '<deviceid=%s time=%s flags=%s info={' % (
+    print('<deviceid=%s time=%s flags=%s info={' % (
         event.data.deviceid,
         event.data.time,
         event.data.flags,
-        )
+        ))
     for info in event.data.info:
         print_info(info)
-    print '}>'
+    print('}>')
 
 
 def print_info(info):
-    print '  <deviceid=%s attachment=%s type=%s enabled=%s flags=%s>' % (
+    print('  <deviceid=%s attachment=%s type=%s enabled=%s flags=%s>' % (
         info.deviceid,
         info.attachment,
         info.type,
         info.enabled,
         info.flags,
-        )
+        ))
 
 
 def main(argv):
@@ -53,10 +53,10 @@ def main(argv):
         xinput_major = extension_info.major_opcode
 
         version_info = display.xinput_query_version()
-        print 'Found XInput version %u.%u' % (
+        print('Found XInput version %u.%u' % (
           version_info.major_version,
           version_info.minor_version,
-        )
+        ))
 
         screen = display.screen()
         screen.root.xinput_select_events([

@@ -42,7 +42,7 @@ ec = error.CatchError(error.BadAtom)
 d = display.Display(options.display)
 
 def print_atom(print_format,atom,value):
-	print print_format%(atom,value)
+	print(print_format%(atom,value))
 
 def list_atoms(d,re_obj,low,high):
 	while(low <= high):
@@ -69,12 +69,12 @@ if options.name != None:
 
 rangeVals = options.range.split("-")
 if rangeVals[0] != "":
-	low = long(rangeVals[0])
+	low = int(rangeVals[0])
 
 if rangeVals[1] != "":
-	high = long(rangeVals[1])
+	high = int(rangeVals[1])
 else:
-	high = sys.maxint
+	high = sys.maxsize
 
 if options.match_re != None:
 	re_obj = re.compile(options.match_re)

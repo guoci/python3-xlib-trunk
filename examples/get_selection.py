@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # examples/get_selection.py -- demonstrate getting selections
 # (equivalent to pasting from the clipboard)

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import sys
 import os
@@ -7,7 +7,7 @@ sys.path[1:1] = [os.path.join(sys.path[0], '..')]
 
 from Xlib import display, X, threaded
 import time
-import thread
+import _thread
 
 def redraw(win, gc):
     # win.clear_area()
@@ -16,7 +16,7 @@ def redraw(win, gc):
 def blink(display, win, gc, cols):
     while 1:
         time.sleep(2)
-        print 'Changing color', cols[0]
+        print('Changing color', cols[0])
         gc.change(foreground = cols[0])
         cols = (cols[1], cols[0])
         redraw(win, gc)
@@ -41,7 +41,7 @@ def main():
 
     gc = window.create_gc(foreground = red)
 
-    thread.start_new_thread(blink, (d, window, gc, (blue, red)))
+    _thread.start_new_thread(blink, (d, window, gc, (blue, red)))
 
     while 1:
         event = d.next_event()
